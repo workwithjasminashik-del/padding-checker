@@ -1,37 +1,37 @@
 export function checkNumberPadding(intStrs: Iterable<string>): number {
-  const arr = Array.from(intStrs);
-
-  // Case 0: No observations
-  if (arr.length === 0) {
-    return 0;
-  }
-
+  
   let hasLeadingZero = false;
   let minLength = Infinity;
-  let allLengthsSame = true;
+  let count = 0;
 
-  const firstLength = arr[0]!.length;
   const paddedLengths = new Set<number>();
+  const digitOnly = /^[0-9]+$/;
 
-  for (const s of arr) {
+  for (const s of intStrs) {
+
+    // Check numeric string 
+    if (!digitOnly.test(s)) {
+      return 0;
+    }
+
+    count++;
     const len = s.length;
 
     // Track smallest length
-    if (len < minLength) {
-      minLength = len;
-    }
-
-    // Check if all lengths are same
-    if (len !== firstLength) {
-      allLengthsSame = false;
-    }
+    minLength = Math.min(minLength, len);
 
     // Detect padded values (leading zero & more than 1 digit)
-    if (len > 1 && s.startsWith("0")) {
+    if (len >1 && s.startsWith("0")) {
       hasLeadingZero = true;
       paddedLengths.add(len);
     }
   }
+
+   // Empty input
+  if (count === 0) return 0;
+
+   // Single value → always inconclusive
+  if (count === 1) return -minLength;
 
   // Case 1: Padding observed
   if (hasLeadingZero) {
@@ -41,18 +41,13 @@ export function checkNumberPadding(intStrs: Iterable<string>): number {
     }
 
     // Consistent padding width
-    return paddedLengths.values().next().value!;
+    return [...paddedLengths][0]!;
   }
 
-  // Case 2: No leading zeros observed
+  // Case 2: No padding observed
 
   // If smallest length is 1 → clearly no padding
   if (minLength === 1) {
-    return 1;
-  }
-
-  // If all lengths same → clearly no padding
-  if (allLengthsSame) {
     return 1;
   }
 
